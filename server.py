@@ -11,6 +11,7 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 
 from mcp.server import Server
+from mcp.server.fastmcp import FastMCP
 from mcp.server.sse import SseServerTransport
 from dotenv import load_dotenv
 
@@ -21,7 +22,7 @@ load_dotenv()
 BASE_URL = "https://api.coingecko.com/api/v3"
 
 # Create MCP server
-mcp_app = Server("crypto-mcp-server")
+mcp_app = FastMCP("crypto-mcp-server")
 
 
 async def coin_price_request(vs_currencies: str, ids: str = None, symbols: str = None) -> Optional[Dict[str, Any]]:
@@ -235,7 +236,7 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run Crypto MCP SSE-based server')
-    parser.add_argument('--host', default='0.0.0.0', help='Host to bind to')
+    parser.add_argument('--host', default='127.0.0.1', help='Host to bind to')
     parser.add_argument('--port', type=int, default=int(os.getenv("PORT", 8000)), help='Port to listen on')
     parser.add_argument('--debug', action='store_true', help='Enable debug mode')
     args = parser.parse_args()
