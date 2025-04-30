@@ -35,16 +35,16 @@ The system consists of:
    PORT=8000
    ```
 
-4. Save the Python server code to `improved_crypto_mcp_server.py`
+4. Save the Python server code to `server.py`
 
 5. Start the server:
    ```bash
-   python improved_crypto_mcp_server.py --port 8000 --debug
+   python server.py --port 8000 --debug
    ```
 
    You can customize the host and port with command-line arguments:
    ```bash
-   python improved_crypto_mcp_server.py --host 127.0.0.1 --port 8080
+   python server.py --host 127.0.0.1 --port 8080
    ```
 
 The server will be available at `http://localhost:8000`.
