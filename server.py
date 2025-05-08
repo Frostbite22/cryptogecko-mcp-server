@@ -56,8 +56,7 @@ async def coin_price_request(vs_currencies: str, ids: str = None, symbols: str =
         params["ids"] = ",".join(resolved_ids)
     
     headers = {
-        "accept": "application/json",
-        "x-cg-demo-api-key": os.getenv("COINGECKO_API_KEY", ""),
+        "accept": "application/json"
     }
     
     async with httpx.AsyncClient() as client:
@@ -140,12 +139,13 @@ async def get_market_data(
     url = f"{BASE_URL}/coins/markets"
     
     params = {
-        "vs_currency": vs_currency,
-        "order": order,
-        "per_page": per_page,
-        "page": page,
-        "sparkline": sparkline
+    "vs_currency": vs_currency,
+    "order": order,
+    "per_page": per_page,
+    "page": page,
+    "sparkline": str(sparkline).lower()
     }
+
     
     if ids:
         params["ids"] = ids
@@ -154,8 +154,7 @@ async def get_market_data(
         params["category"] = category
     
     headers = {
-        "accept": "application/json",
-        "x-cg-demo-api-key": os.getenv("COINGECKO_API_KEY", ""),
+        "accept": "application/json"
     }
     
     async with httpx.AsyncClient() as client:
