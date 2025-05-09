@@ -231,6 +231,107 @@ PROMPTS = {
 async def list_prompts() -> list[types.Prompt]:
     return list(PROMPTS.values())
 
+@server.get_prompt()
+async def get_prompt(
+    name : str, arguments: dict[str, str] | None = None
+) -> types.GetPromptResult:
+    if name not in PROMPTS:
+        raise ValueError(f"Prompt '{name}' not found.")
+    
+    if name == "get_coin_list":
+        return types.GetPromptResult(
+            messages = [
+                types.PromptMessage(
+                role="user",
+                content = types.TextContent(
+                    type="text",
+                    text="Get a list of all coins available on CoinGecko",
+                    ),
+                ),
+            ]      
+        )
+    
+    if name == "get_price":
+        
+        vs_currencies = arguments.get("vs_currencies") if arguments.get("vs_currencies") else "usd"
+        ids = arguments.get("ids") if arguments.get("ids") else ""
+        symbols = arguments.get("symbols") if arguments.get("symbols") else ""
+        
+        text = f"Get the price of selected coins. vs_currencies: {vs_currencies}"
+        if ids:
+            text += f", ids: {ids}"
+        if symbols:
+            text += f", symbols: {symbols}"
+
+        if not vs_currencies:
+            raise ValueError("vs_currencies argument is required.")
+        
+        return types.GetPromptResult(
+            messages=[
+                types.PromptMessage(
+                    role="user",
+                    content=types.TextContent(
+                        type="text",
+                        text=text
+                        )
+                )
+            ]
+        )
+    
+    if name == "get_market_data":
+        if arguments is None:
+            raise ValueError("Arguments are required for this prompt.")
+        
+        vs_currency = arguments.get("vs_currency") if arguments.get("vs_currency") else "usd"
+        ids = arguments.get("ids") if arguments.get("ids") else ""
+        category = arguments.get("category") if arguments.get("category") else ""
+        order = arguments.get("order") if arguments.get("order") else "market_cap_desc"
+        per_page = arguments.get("per_page") if arguments.get("per_page") else 100
+        page = arguments.get("page") if arguments.get("page") else 1
+        sparkline = arguments.get("sparkline") if arguments.get("sparkline") else False
+        
+        text = f"Get cryptocurrency market data. vs_currency: {vs_currency}"
+        if ids:
+            text += f", ids: {ids}"
+        if category:
+            text += f", category: {category}"
+        if order:
+            text += f", order: {order}"
+        if per_page:
+            text += f", per_page: {per_page}"
+        if page:
+            text += f", page: {page}"
+        if sparkline:
+            text += f", sparkline: {sparkline}"
+
+        return types.GetPromptResult(
+            messages=[
+                types.PromptMessage(
+                    role="user",
+                    content=types.TextContent(
+                        type="text",
+                        text=text
+                        )
+                ),
+            ]
+        )
+    
+    if name == "get_trending":
+        return types.GetPromptResult(
+            messages=[
+                types.PromptMessage(
+                    role="user",
+                    content=types.TextContent(
+                        type="text",
+                        text="Get trending coins in the last 24 hours"
+                        )
+                ),
+            ]
+        )
+    
+    raise ValueError("Prompt implementation not found")
+
+
 # Health check endpoint
 async def health_check(request: Request) -> JSONResponse:
     return JSONResponse({"status": "ok", "service": "crypto-mcp-server"})
