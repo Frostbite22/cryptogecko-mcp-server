@@ -12,6 +12,7 @@ from starlette.requests import Request
 
 from mcp.server import Server
 from mcp.server.fastmcp import FastMCP
+import mcp.types as types
 from mcp.server.sse import SseServerTransport
 from dotenv import load_dotenv
 
@@ -23,7 +24,7 @@ BASE_URL = "https://api.coingecko.com/api/v3"
 
 # Create MCP server
 mcp_app = FastMCP("crypto-mcp-server")
-
+server = mcp_app._mcp_server
 
 async def coin_price_request(vs_currencies: str, ids: str = None, symbols: str = None) -> Optional[Dict[str, Any]]:
     """
@@ -191,6 +192,44 @@ async def get_trending() -> Dict[str, Any]:
         except httpx.HTTPStatusError as e:
             print(f"HTTP error occurred: {e}")
             return {"error": f"HTTP error: {str(e)}"}
+
+## We will start by get coin list and then get the trending coins prompts
+PROMPTS = {
+    "get_coin_list": types.Prompt(
+        name="get_coin_list",
+        description="Get a list of all coins available on CoinGecko",
+    ),
+    "get_price": types.Prompt(
+        name="get_price",
+        description="Get the price of selected coins",
+        arguments=[
+            types.PromptArgument(name="vs_currencies", description="Comma-separated list of currencies (e.g., 'usd,eur')", required=True),
+            types.PromptArgument(name="ids", description="Comma-separated list of coin IDs (e.g., 'bitcoin,ethereum')",required=False),
+            types.PromptArgument(name="symbols", description="Comma-separated list of coin symbols (e.g., 'btc,eth')", required=False),
+        ],
+    ),
+    "get_market_data": types.Prompt(
+        name="get_market_data",
+        description="Get cryptocurrency market data",
+        arguments=[
+            types.PromptArgument(name="vs_currency", description="The target currency (e.g., 'usd', 'eur')", required=True),
+            types.PromptArgument(name="ids", description="Comma-separated list of coin IDs", required=False),
+            types.PromptArgument(name="category", description="Filter by category", required=False),
+            types.PromptArgument(name="order", description="Sort by field (market_cap_desc, volume_asc, etc.)", required=False),
+            types.PromptArgument(name="per_page", description="Number of results per page", required=False),
+            types.PromptArgument(name="page", description="Page number", required=False),
+            types.PromptArgument(name="sparkline", description="Include sparkline data", required=False),
+        ],
+    ),
+    "get_trending": types.Prompt(
+        name="get_trending",
+        description="Get trending coins in the last 24 hours",
+    ),
+}
+
+@server.list_prompts()
+async def list_prompts() -> list[types.Prompt]:
+    return list(PROMPTS.values())
 
 # Health check endpoint
 async def health_check(request: Request) -> JSONResponse:
